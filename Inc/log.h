@@ -28,7 +28,7 @@
 #define LOG_UART_PORT     USART1
 #define LOG_UART_INST     CFG_UART_INTERFACE
 
-#define LOG_QUEUE_SIZE    8
+#define LOG_QUEUE_SIZE    16
 #define LOG_DATA_SIZE     128
 
 #define LOG_WAIT_TIMEOUT  100

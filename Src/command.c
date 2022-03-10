@@ -15,18 +15,73 @@
 #include "stdarg.h"
 #include "usart.h"
 #include "stdlib.h"
+#include "tim.h"
+#include "gpio.h"
+#include "stm32f4xx_hal_uart.h"
+#include "dma.h"
 
 /* Private define --------------------------------------------------------------- */
 typedef void (*pCMD)(char*);
 
 /* Exported variables ----------------------------------------------------------- */
-
+extern TIM_HandleTypeDef htim8;
 
 /* Private variables ------------------------------------------------------------ */
 static osMessageQId   hCmdMessage;
 static osThreadId     hCmdThread;
 
 static char cmdData[CMD_DATA_SIZE];
+
+typedef void (*pCMD)(char*);
+
+/* Command Definition Start ------------------------------------------------------ */
+/* Declare command functions */
+void CMD_SetPWMHz(char* args);
+void CMD_SetPWMDuty(char* args);
+void CMD_SetLEDOff(char* args);
+void CMD_SetLEDOn(char* args);
+/* If need new command, add here. */
+void CMD_Help(char* args);
+
+typedef enum
+{
+  CMD_TYPE_SET_PWM_HZ,
+  CMD_TYPE_SET_PWM_DUTY,
+  CMD_TYPE_SET_LED_OFF,
+  CMD_TYPE_SET_LED_ON,
+  /* If need new command, add here. */
+  CMD_TYPE_HELP,
+  CMD_TYPE_MAX
+} CMD_TypeDef;
+
+char* CMD_list[CMD_TYPE_MAX] = {
+  [CMD_TYPE_SET_PWM_HZ]       = "setPWMHz",
+  [CMD_TYPE_SET_PWM_DUTY]     = "setPWMDuty",
+  [CMD_TYPE_SET_LED_OFF]      = "setLEDOff",
+  [CMD_TYPE_SET_LED_ON]       = "setLEDOn",
+  /* If need new command, add here. */
+  [CMD_TYPE_HELP]             = "help"
+};
+
+char* CMD_info[CMD_TYPE_MAX] = {
+  [CMD_TYPE_SET_PWM_HZ]       = "[channel] [frequency]",
+  [CMD_TYPE_SET_PWM_DUTY]     = "[channel] [duty 0~100]",
+  [CMD_TYPE_SET_LED_OFF]      = "[channel]",
+  [CMD_TYPE_SET_LED_ON]       = "[channel]",
+  /* If need new command, add here. */
+  [CMD_TYPE_HELP]             = ""
+};
+
+void (*CMD_functions[CMD_TYPE_MAX])(char* args) = {
+  [CMD_TYPE_SET_PWM_HZ]       = &CMD_SetPWMHz,
+  [CMD_TYPE_SET_PWM_DUTY]     = &CMD_SetPWMDuty,
+  [CMD_TYPE_SET_LED_OFF]      = &CMD_SetLEDOff,
+  [CMD_TYPE_SET_LED_ON]       = &CMD_SetLEDOn,
+  /* If need new command, add here. */
+  [CMD_TYPE_HELP]             = &CMD_Help
+};
+/* Command Definition End ------------------------------------------------------- */
+
 
 /**
  * @brief   Initialize command module.
@@ -40,7 +95,7 @@ void CMD_Init()
   hCmdMessage = osMessageCreate(osMessageQ(CmdQueue), NULL);
 
   /* Create command thread. */
-  osThreadDef(CmdThread, CMD_Thread, osPriorityAboveNormal, 0, 512);
+  osThreadDef(CmdThread, CMD_Thread, osPriorityAboveNormal, 0, 1024);
   hCmdThread = osThreadCreate(osThread(CmdThread), NULL);
 
   LOGD("[-]");
@@ -68,10 +123,15 @@ void CMD_Thread(const void* arg)
   CMD_TypeDef cmdType;
 
   for ( ; ; ) {
-
+    /* For escaping busy waiting, use DMA when receiving data from UART. */
     if ( HAL_UART_Receive_DMA(&CMD_UART_INST, (uint8_t*)cmdData, CMD_DATA_SIZE) == HAL_OK ) {
       /* DMA function is non-blocking. Therefore make block by message queue. */
       event = osMessageGet(hCmdMessage, osWaitForever);
+
+      if ( event.value.v == CMD_IRQ_TYPE_ERR ) {
+        LOGE("DMA error");
+        continue;
+      }
 
       if ( event.status == osEventMessage ) {
 
@@ -135,30 +195,73 @@ uint32_t CMD_Atoi(char* strNum)
 /* Define command functions from UART. --------------------------------------------------------- */
 
 /**
- * @brief   Set PWM frequency. Channel is xx ~ xx. Frequency range is xx ~ xx.
+ * @brief   Set PWM frequency. Channel is 1 ~ 18. Frequency range is xx ~ xx.
  */
 void CMD_SetPWMHz(char* args)
 {
+  char* tok;
+  uint32_t channel;
+  uint32_t freq;
 
+  tok = strtok(args, " ");
+  channel = CMD_Atoi(tok);
 
+  tok = strtok(args, NULL);
+  freq = CMD_Atoi(tok);
+
+  LOGI("ch: %d, freq: %d Hz", channel, freq);
+
+  if ( channel == 1 ) {
+
+  }
+  else {
+    LOGE("Not implemented %d channel yet.", channel);
+  }
 }
 
 /**
- * @brief   Set PWM duty. Channel is xx ~ xx. Duty range is xx ~ xx.
+ * @brief   Set PWM duty. Channel is 1 ~ 18. Duty range is 0 ~ 100.
  */
 void CMD_SetPWMDuty(char* args)
 {
+  char* tok;
+  uint32_t channel;
+  uint32_t duty;
+  uint32_t ccr;
 
+  tok = strtok(args, " ");
+  channel = CMD_Atoi(tok);
 
+  tok = strtok(args, NULL);
+  duty = CMD_Atoi(tok);
+
+  if ( channel == 1 ) {
+
+    htim8.Instance->CNT = 0;
+    htim8.Instance->CCR1 = duty;
+  }
+  else {
+    LOGE("Not implemented %d channel yet.", channel);
+  }
 }
 
 /**
- * @brief   Set LED off. Channel is xx ~ xx.
+ * @brief   Set LED off. Channel is 1 ~ 18.
  */
 void CMD_SetLEDOff(char* args)
 {
+  char* tok;
+  uint32_t channel;
 
+  tok = strtok(args, " ");
+  channel = CMD_Atoi(tok);
 
+  if ( channel == 1 ) {
+    HAL_GPIO_WritePin(LED_OFF1_GPIO_Port, LED_OFF1_Pin, GPIO_PIN_RESET);
+  }
+  else {
+    LOGE("Not implemented %d channel yet.", channel);
+  }
 }
 
 /**
@@ -166,6 +269,51 @@ void CMD_SetLEDOff(char* args)
  */
 void CMD_SetLEDOn(char* args)
 {
+  char* tok;
+  uint32_t channel;
 
+  tok = strtok(args, " ");
+  channel = CMD_Atoi(tok);
 
+  if ( channel == 1 ) {
+    HAL_GPIO_WritePin(LED_OFF1_GPIO_Port, LED_OFF1_Pin, GPIO_PIN_SET);
+  }
+  else {
+    LOGE("Not implemented %d channel yet.", channel);
+  }
+}
+
+/**
+ * @brief   Print command list and arguments.
+ */
+void CMD_Help(char* args)
+{
+  int i;
+  LOGI("-------------- Command List -----------------");
+  for ( i = 0 ; i < CMD_TYPE_MAX ; i++ ) {
+    LOGI("%s %s", CMD_list[i], CMD_info[i]);
+  }
+  LOGI("---------------------------------------------");
+}
+
+/**
+  * @brief  Rx Transfer completed callbacks.
+  */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if ( huart->Instance == CMD_UART_INST.Instance ) {
+    osMessagePut(hCmdMessage, CMD_IRQ_TYPE_RX, 100);
+  }
+}
+
+/**
+  * @brief  UART error callbacks.
+  */
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+  if ( huart->Instance == CMD_UART_INST.Instance ) {
+    osMessagePut(hCmdMessage, CMD_IRQ_TYPE_ERR, 100);
+    HAL_UART_DeInit(huart);
+    HAL_UART_Init(huart);
+  }
 }

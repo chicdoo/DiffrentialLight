@@ -47,7 +47,7 @@ void LOG_Init()
   osMessageQDef(LogQueue, LOG_QUEUE_SIZE, uint8_t*);
   hLogQueue = osMessageCreate(osMessageQ(LogQueue), NULL);
 
-  osThreadDef(LogThread, LOG_Thread, osPriorityNormal, 0, 256);
+  osThreadDef(LogThread, LOG_Thread, osPriorityHigh, 0, 512);
   hLogThread = osThreadCreate(osThread(LogThread), NULL);
 }
 
@@ -106,6 +106,7 @@ void LOG_Push(char level, const char* func, char* message, ...)
     sprintf(strLogData[i32LogIndex], "[%s][%s][%c] %s\r\n", LOG_GetTime(), func, level, msg);
     osMessagePut(hLogQueue, (uint32_t)strLogData[i32LogIndex], LOG_WAIT_TIMEOUT);
     i32LogIndex = (i32LogIndex + 1) % LOG_QUEUE_SIZE;
+    osMutexRelease(hLogMutex);
   }
 }
 
@@ -126,8 +127,6 @@ char* LOG_GetTime()
 
   min = time % 60;
   time = time / 60;
-
-
 
   hour = time % 24;
 

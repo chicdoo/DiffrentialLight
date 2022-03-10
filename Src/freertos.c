@@ -31,6 +31,7 @@
 #include "spi.h"
 #include "usart.h"
 #include "log.h"
+#include "command.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -103,6 +104,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -111,8 +113,8 @@ void MX_FREERTOS_Init(void) {
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
   LOG_Init();
+  CMD_Init();
   /* USER CODE END RTOS_THREADS */
 
 }
@@ -129,22 +131,22 @@ void StartDefaultTask(void const * argument)
   /* USER CODE BEGIN StartDefaultTask */
   /* Infinite loop */
 
-
-
-  uint8_t pData[2];
-  uint8_t msg[64];
-
-  pData[0] = 0x20;
-  pData[1] = 0x04;
-
-  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
-  HAL_GPIO_WritePin(LED_OFF1_GPIO_Port, LED_OFF1_Pin, GPIO_PIN_SET);
-
+//
+//
+//  uint8_t pData[2];
+//  uint8_t msg[64];
+//
+//  pData[0] = 0x20;
+//  pData[1] = 0x04;
+//
+//  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
+//  HAL_GPIO_WritePin(LED_OFF1_GPIO_Port, LED_OFF1_Pin, GPIO_PIN_RESET);
+//
+////  HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_RESET);
+////  HAL_SPI_Transmit(&hspi1, pData, 2, 100);
+////  HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_SET);
 //  HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_RESET);
-//  HAL_SPI_Transmit(&hspi1, pData, 2, 100);
-//  HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_RESET);
-  osDelay(1000);
+//  osDelay(1000);
 
 //  pData[0] = 0xFF;
 //  pData[1] = 0x2F;
