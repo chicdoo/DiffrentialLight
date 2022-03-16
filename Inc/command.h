@@ -8,6 +8,7 @@
  * 2022-03-08   Create.
  * 2022-03-11   Debugging UART DMA rx. ErrorCode is 8 (overrun).
  *              Implements PWM functions. Not completed.
+ * 2022-03-17   Fix UART DMA not working. Should be initialize UART before DMA.
  * ------------------------------------------------------------------------------ */
 
 /* Define to prevent recursive inclusion ---------------------------------------- */
@@ -79,6 +80,7 @@ typedef enum
 /* Exported functions -------------------------------------------------------------- */
 void CMD_Init();
 void CMD_DeInit();
+void CMD_IRQHandler(CMD_IRQTypekDef type);
 
 /* Private functions --------------------------------------------------------------- */
 void CMD_Thread(const void* arg);

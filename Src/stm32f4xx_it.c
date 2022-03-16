@@ -22,6 +22,7 @@
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "command.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -234,6 +235,25 @@ void DMA2_Stream2_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+/**
+  * @brief  Rx Transfer completed callbacks.
+  */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if ( huart->Instance == CMD_UART_INST.Instance ) {
+    CMD_IRQHandler(CMD_IRQ_TYPE_RX);
+  }
+}
+
+/**
+  * @brief  UART error callbacks.
+  */
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+  if ( huart->Instance == CMD_UART_INST.Instance ) {
+    CMD_IRQHandler(CMD_IRQ_TYPE_ERR);
+  }
+}
 
 /* USER CODE END 1 */
 

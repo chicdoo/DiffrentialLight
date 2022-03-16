@@ -178,7 +178,7 @@ void StartDefaultTask(void const * argument)
 //
 //    HAL_UART_Transmit(&huart1, msg, (uint16_t)strlen(msg), 100);
 
-    osDelay(2000);
+    osDelay(5000);
 
 //
 //

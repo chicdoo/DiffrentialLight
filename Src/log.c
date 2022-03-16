@@ -18,7 +18,6 @@
 /* Private define --------------------------------------------------------------- */
 
 
-
 /* Private variables ------------------------------------------------------------ */
 osThreadId          hLogThread;
 osMessageQId        hLogQueue;
@@ -47,7 +46,7 @@ void LOG_Init()
   osMessageQDef(LogQueue, LOG_QUEUE_SIZE, uint8_t*);
   hLogQueue = osMessageCreate(osMessageQ(LogQueue), NULL);
 
-  osThreadDef(LogThread, LOG_Thread, osPriorityHigh, 0, 512);
+  osThreadDef(LogThread, LOG_Thread, osPriorityNormal, 0, 512);
   hLogThread = osThreadCreate(osThread(LogThread), NULL);
 }
 

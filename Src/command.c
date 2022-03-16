@@ -18,7 +18,6 @@
 #include "tim.h"
 #include "gpio.h"
 #include "stm32f4xx_hal_uart.h"
-#include "dma.h"
 
 /* Private define --------------------------------------------------------------- */
 typedef void (*pCMD)(char*);
@@ -95,7 +94,7 @@ void CMD_Init()
   hCmdMessage = osMessageCreate(osMessageQ(CmdQueue), NULL);
 
   /* Create command thread. */
-  osThreadDef(CmdThread, CMD_Thread, osPriorityAboveNormal, 0, 1024);
+  osThreadDef(CmdThread, CMD_Thread, osPriorityAboveNormal, 0, 2048);
   hCmdThread = osThreadCreate(osThread(CmdThread), NULL);
 
   LOGD("[-]");
@@ -127,6 +126,7 @@ void CMD_Thread(const void* arg)
     if ( HAL_UART_Receive_DMA(&CMD_UART_INST, (uint8_t*)cmdData, CMD_DATA_SIZE) == HAL_OK ) {
       /* DMA function is non-blocking. Therefore make block by message queue. */
       event = osMessageGet(hCmdMessage, osWaitForever);
+      LOGI("%s", cmdData);
 
       if ( event.value.v == CMD_IRQ_TYPE_ERR ) {
         LOGE("DMA error");
@@ -296,24 +296,34 @@ void CMD_Help(char* args)
   LOGI("---------------------------------------------");
 }
 
-/**
-  * @brief  Rx Transfer completed callbacks.
-  */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+
+void CMD_IRQHandler(CMD_IRQTypekDef type)
 {
-  if ( huart->Instance == CMD_UART_INST.Instance ) {
-    osMessagePut(hCmdMessage, CMD_IRQ_TYPE_RX, 100);
-  }
+  /* Why don't use LOG function? */
+  osMessagePut(hCmdMessage, type, 100);
 }
 
-/**
-  * @brief  UART error callbacks.
-  */
-void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
-{
-  if ( huart->Instance == CMD_UART_INST.Instance ) {
-    osMessagePut(hCmdMessage, CMD_IRQ_TYPE_ERR, 100);
-    HAL_UART_DeInit(huart);
-    HAL_UART_Init(huart);
-  }
-}
+///**
+//  * @brief  Rx Transfer completed callbacks.
+//  */
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//{
+//  if ( huart->Instance == CMD_UART_INST.Instance ) {
+//    osMessagePut(hCmdMessage, CMD_IRQ_TYPE_RX, 100);
+//  }
+//}
+//
+///**
+//  * @brief  UART error callbacks.
+//  */
+//void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+//{
+//  if ( huart->Instance == CMD_UART_INST.Instance ) {
+//
+//    LOGE("DMA Error: %d", huart->ErrorCode);
+//
+////    osMessagePut(hCmdMessage, CMD_IRQ_TYPE_ERR, 100);
+////    HAL_UART_DeInit(huart);
+////    HAL_UART_Init(huart);
+//  }
+//}
