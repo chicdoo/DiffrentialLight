@@ -25,13 +25,14 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdio.h>
-#include <string.h>
+#include "stdio.h"
+#include "string.h"
 #include "gpio.h"
 #include "spi.h"
 #include "usart.h"
 #include "log.h"
 #include "command.h"
+#include "pwm.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -114,6 +115,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_THREADS */
   LOG_Init();
+  PWM_Init();
   CMD_Init();
   /* USER CODE END RTOS_THREADS */
 
@@ -159,6 +161,8 @@ void StartDefaultTask(void const * argument)
 //
 //  osDelay(2000);
 
+  HAL_GPIO_WritePin(LED_OFF1_GPIO_Port, LED_OFF1_Pin, GPIO_PIN_SET);
+
   for(;;)
   {
 //    HAL_GPIO_TogglePin(DA1_EN_GPIO_Port, DA1_EN_Pin);
@@ -174,11 +178,14 @@ void StartDefaultTask(void const * argument)
 //    HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_RESET);
 
     LOGD("Hello");
-//    sprintf((char*)msg, "LED: %d\r\n", pData[0]);
-//
-//    HAL_UART_Transmit(&huart1, msg, (uint16_t)strlen(msg), 100);
 
-    osDelay(5000);
+    PWM_SetDuty(1, 100);
+
+    osDelay(2000);
+
+    PWM_SetDuty(1, 0);
+
+    osDelay(2000);
 
 //
 //
