@@ -66,7 +66,7 @@ void PWM_DeInit()
 }
 
 /**
- * @brief   Set PWM duty. Duty range is from 0 to 999.
+ * @brief   Set PWM duty. Duty range is from 0 to 4000.
  */
 void PWM_SetDuty(int channel, int duty)
 {
@@ -74,7 +74,7 @@ void PWM_SetDuty(int channel, int duty)
 
   LOGI("CH: %d, Duty: %d", channel, duty);
 
-  if ( duty < 0 || duty >= 1000 ) {
+  if ( duty < 0 || duty > 4000 ) {
     LOGE("Invalid duty range - %d", duty);
   }
   else {

@@ -69,6 +69,8 @@ void Error_Handler(void);
 #define DEV_TX_GPIO_Port GPIOB
 #define DEV_RX_Pin GPIO_PIN_11
 #define DEV_RX_GPIO_Port GPIOB
+#define FAN_EN_Pin GPIO_PIN_9
+#define FAN_EN_GPIO_Port GPIOH
 #define DA1_EN_Pin GPIO_PIN_10
 #define DA1_EN_GPIO_Port GPIOH
 #define DA2_EN_Pin GPIO_PIN_11
@@ -119,6 +121,12 @@ void Error_Handler(void);
 #define LED_OFF9_GPIO_Port GPIOD
 #define LED_OFF10_Pin GPIO_PIN_3
 #define LED_OFF10_GPIO_Port GPIOD
+#define RS485_TX_Pin GPIO_PIN_5
+#define RS485_TX_GPIO_Port GPIOD
+#define RS485_RX_Pin GPIO_PIN_6
+#define RS485_RX_GPIO_Port GPIOD
+#define RS485_EN_Pin GPIO_PIN_7
+#define RS485_EN_GPIO_Port GPIOD
 #define PWM_CH1_Pin GPIO_PIN_5
 #define PWM_CH1_GPIO_Port GPIOI
 /* USER CODE BEGIN Private defines */

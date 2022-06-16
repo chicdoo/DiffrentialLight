@@ -33,6 +33,7 @@
 #include "log.h"
 #include "command.h"
 #include "pwm.h"
+#include "dac.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -117,6 +118,7 @@ void MX_FREERTOS_Init(void) {
   LOG_Init();
   PWM_Init();
   CMD_Init();
+  DAC_BU2505FV_Init();
   /* USER CODE END RTOS_THREADS */
 
 }
@@ -133,105 +135,14 @@ void StartDefaultTask(void const * argument)
   /* USER CODE BEGIN StartDefaultTask */
   /* Infinite loop */
 
-//
-//
-//  uint8_t pData[2];
-//  uint8_t msg[64];
-//
-//  pData[0] = 0x20;
-//  pData[1] = 0x04;
-//
-//  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
-//  HAL_GPIO_WritePin(LED_OFF1_GPIO_Port, LED_OFF1_Pin, GPIO_PIN_RESET);
-//
-////  HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_RESET);
-////  HAL_SPI_Transmit(&hspi1, pData, 2, 100);
-////  HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_SET);
-//  HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_RESET);
-//  osDelay(1000);
+  PWM_SetDuty(1, 1000);
+  PWM_SetDuty(4, 1000);
+  PWM_SetDuty(5, 1000);
+  PWM_SetDuty(6, 1000);
 
-//  pData[0] = 0xFF;
-//  pData[1] = 0x2F;
-//
-//  HAL_SPI_Transmit(&hspi1, pData, 1, 100);
-//  osDelay(1);
-//  HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_SET);
-//  osDelay(1);
-//  HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_RESET);
-//
-//  osDelay(2000);
-
-  HAL_GPIO_WritePin(LED_OFF1_GPIO_Port, LED_OFF1_Pin, GPIO_PIN_SET);
-
-  for(;;)
-  {
-//    HAL_GPIO_TogglePin(DA1_EN_GPIO_Port, DA1_EN_Pin);
-//    HAL_SPI_Transmit(&hspi1, pData, 2, 1);
-
-//    pData[0] = 0x00;
-//    pData[1] = 0x20;
-//
-//    HAL_SPI_Transmit(&hspi1, pData, 1, 100);
-//    osDelay(1);
-//    HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_SET);
-//    osDelay(1);
-//    HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_RESET);
-
-    LOGD("Hello");
-
-    PWM_SetDuty(1, 100);
+  for ( ; ; ) {
 
     osDelay(2000);
-
-    PWM_SetDuty(1, 0);
-
-    osDelay(2000);
-
-//
-//
-//    pData[0] = 0x00;
-//    pData[1] = 0x20;
-//
-//
-//    HAL_SPI_Transmit(&hspi1, pData, 1, 100);
-//    osDelay(1);
-//    HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_SET);
-//    osDelay(1);
-//    HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_RESET);
-//
-//
-//    sprintf((char*)msg, "LED: %d", pData[0]);
-//
-//    HAL_UART_Transmit(&huart1, msg, strlen(msg), 100);
-//
-//    osDelay(2000);
-
-//    pData[0] = 0x04;
-//    pData[1] = 0x20;
-//
-//    HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_RESET);
-//    HAL_SPI_Transmit(&hspi1, pData, 2, 100);
-//    HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_SET);
-//
-//    osDelay(1000);
-//
-//    pData[0] = 0x04;
-//    pData[1] = 0x30;
-//
-//    HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_RESET);
-//    HAL_SPI_Transmit(&hspi1, pData, 2, 100);
-//    HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_SET);
-//
-//    osDelay(1000);
-//
-//    pData[0] = 0x04;
-//    pData[1] = 0x40;
-//
-//    HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_RESET);
-//    HAL_SPI_Transmit(&hspi1, pData, 2, 100);
-//    HAL_GPIO_WritePin(DA1_EN_GPIO_Port, DA1_EN_Pin, GPIO_PIN_SET);
-//
-//    osDelay(1000);
 
   }
   /* USER CODE END StartDefaultTask */

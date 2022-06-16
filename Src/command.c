@@ -39,6 +39,7 @@ void CMD_SetPWMHz(char* args);
 void CMD_SetPWMDuty(char* args);
 void CMD_SetLEDOff(char* args);
 void CMD_SetLEDOn(char* args);
+void CMD_SetDAC(char* args);
 /* If need new command, add here. */
 void CMD_Help(char* args);
 
@@ -48,6 +49,7 @@ typedef enum
   CMD_TYPE_SET_PWM_DUTY,
   CMD_TYPE_SET_LED_OFF,
   CMD_TYPE_SET_LED_ON,
+  CMD_TYPE_SET_DAC,
   /* If need new command, add here. */
   CMD_TYPE_HELP,
   CMD_TYPE_MAX
@@ -58,15 +60,17 @@ char* CMD_list[CMD_TYPE_MAX] = {
   [CMD_TYPE_SET_PWM_DUTY]     = "setPWMDuty",
   [CMD_TYPE_SET_LED_OFF]      = "setLEDOff",
   [CMD_TYPE_SET_LED_ON]       = "setLEDOn",
+  [CMD_TYPE_SET_DAC]          = "setDAC",
   /* If need new command, add here. */
   [CMD_TYPE_HELP]             = "help"
 };
 
 char* CMD_info[CMD_TYPE_MAX] = {
   [CMD_TYPE_SET_PWM_HZ]       = "[channel] [frequency]",
-  [CMD_TYPE_SET_PWM_DUTY]     = "[channel] [duty 0~100]",
+  [CMD_TYPE_SET_PWM_DUTY]     = "[channel] [duty 0~4000]",
   [CMD_TYPE_SET_LED_OFF]      = "[channel]",
   [CMD_TYPE_SET_LED_ON]       = "[channel]",
+  [CMD_TYPE_SET_DAC]          = "[channel] [data 0~1023]",
   /* If need new command, add here. */
   [CMD_TYPE_HELP]             = ""
 };
@@ -76,6 +80,7 @@ void (*CMD_functions[CMD_TYPE_MAX])(char* args) = {
   [CMD_TYPE_SET_PWM_DUTY]     = &CMD_SetPWMDuty,
   [CMD_TYPE_SET_LED_OFF]      = &CMD_SetLEDOff,
   [CMD_TYPE_SET_LED_ON]       = &CMD_SetLEDOn,
+  [CMD_TYPE_SET_DAC]          = &CMD_SetDAC,
   /* If need new command, add here. */
   [CMD_TYPE_HELP]             = &CMD_Help
 };
@@ -220,14 +225,13 @@ void CMD_SetPWMHz(char* args)
 }
 
 /**
- * @brief   Set PWM duty. Channel is 1 ~ 18. Duty range is 0 ~ 100.
+ * @brief   Set PWM duty. Channel is 1 ~ 18. Duty range is 0 ~ 999.
  */
 void CMD_SetPWMDuty(char* args)
 {
   char* tok;
   uint32_t channel;
   uint32_t duty;
-  uint32_t ccr;
 
   tok = strtok(args, " ");
   channel = CMD_Atoi(tok);
@@ -239,6 +243,29 @@ void CMD_SetPWMDuty(char* args)
 
     htim8.Instance->CNT = 0;
     htim8.Instance->CCR1 = duty;
+  }
+  else if ( channel == 2 ) {
+
+    htim8.Instance->CNT = 0;
+    htim8.Instance->CCR4 = duty;
+  }
+//  else if ( channel == 3 ) {
+//
+//    LOGE("Not support channel %d", channel);
+//  }
+//  else if ( channel == 4 ) {
+//
+//    LOGE("Not support channel %d", channel);
+//  }
+  else if ( channel == 5 ) {
+
+    htim9.Instance->CNT = 0;
+    htim9.Instance->CCR1 = duty;
+  }
+  else if ( channel == 6 ) {
+
+    htim9.Instance->CNT = 0;
+    htim9.Instance->CCR2 = duty;
   }
   else {
     LOGE("Not implemented %d channel yet.", channel);
@@ -282,6 +309,22 @@ void CMD_SetLEDOn(char* args)
     LOGE("Not implemented %d channel yet.", channel);
   }
 }
+
+void CMD_SetDAC(char* args)
+{
+  char* tok;
+  uint32_t channel;
+  uint32_t data;
+
+  tok = strtok(args, " ");
+  channel = CMD_Atoi(tok);
+
+  tok = strtok(NULL, " ");
+  data = CMD_Atoi(tok);
+
+  DAC_SetData((uint8_t)channel, (uint16_t)data);
+}
+
 
 /**
  * @brief   Print command list and arguments.
